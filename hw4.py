@@ -26,13 +26,25 @@ class Customer:
             self.submit_order(cashier, stall, bill) 
     
     # Submit_order takes a cashier, a stall and an amount as parameters, 
-    # it deducts the amount from the customer’s wallet and calls the receive_payment method on the cashier object
+    # it deducts the amount from the customer’s wallet and calls the receive_payment method 
+    # on the cashier object
+
+    # Complete the submit_order method in the Customer class. This method takes a cashier, a stall and an 
+    # amount as parameters, and has the customer pay the cashier the specified amount using the
+    #  receive_payment method in the cashier class (i.e., it deducts money from the customer’s wallet and 
+    # adds it to the stall). See the test cases under test_make_payment for clues on how this method
+    #  should behave.
+
     def submit_order(self, cashier, stall, amount): 
-        pass
+        print('Lennox originally had :', self.wallet)
+        self.wallet -= amount
+        cashier.receive_payment(stall, amount)
+        print('After payment new wallet balance :', self.wallet) 
+
 
     # The __str__ method prints the customer's information.    
     def __str__(self):
-        return "Hello! My name is " + self.name + ". I have $" + str(self.wallet) + " in my payment card."
+        return "Hello! My name is " + self.name + ". I have $" + str(self.wallet) + "in my payment card."
 
 
 # The Cashier class
@@ -52,7 +64,7 @@ class Cashier:
     def add_stall(self, new_stall):
         self.directory.append(new_stall)
 
-    # Receives payment from customer, and adds the money to the stall's earnings.
+    # Receives payment from customer, and adds the money to the stall's earnings. THIS FUNCTION WAS ALREADY PROVIDED
     def receive_payment(self, stall, money):
         stall.earnings += money
 
@@ -66,13 +78,58 @@ class Cashier:
     
     # string function.
     def __str__(self):
-
         return "Hello, this is the " + self.name + " cashier. We take preloaded market payment cards only. We have " + str(sum([len(category) for category in self.directory.values()])) + " vendors in the farmers' market."
 
 ## Complete the Stall class here following the instructions in HW_4_instructions_rubric
 class Stall:
     
-    pass
+    def __init__(self, name, inventory = {}, earnings = 0, cost = 7):
+        self.name = name
+        self.inventory = inventory
+        self.earnings = earnings
+        self.cost = cost
+
+    def process_order(self, name, quantity):
+        if name in self.inventory:
+            if quantity >= self.inventory[name]:
+                self.inventory[name] -= quantity
+            else: 
+                print("Inventory for this item is insufficient")
+    #A has_item method that takes the food name and the quantity and returns True if there
+    #is enough food left in the inventory and False otherwise.
+    def has_item (self, food, quantity):
+        if self.inventory[food] >= quantity:
+            return True
+        else:
+            return False
+
+    #A stock_up method that takes the food name and the quantity. It will add the quantity 
+    #to the existing quantity if the item exists in the inventory dictionary or 
+    #create a new item in the inventory dictionary with the item name as the key and 
+    #the quantity as the value.
+
+    def stock_up(self, food_name, quantity):
+        if food_name in self.inventory:
+            self.inventory[food_name] += quantity
+        else:
+            self.inventory[food_name] = quantity
+#A compute_cost method that takes the quantity and returns the total for an order.
+# Since all the foods in one stall have the same cost, you only need to know the quantity 
+#of food items that the customer has ordered.
+    def compute_cost(self, quantity):
+        return self.cost*quantity
+
+    def __str__(self):
+        print("Hello, we are {}. This is the current menu {}. We charge ${} per item. We have ${} in total.".format(self.name, self.inventory.keys(), self.cost, self.earnings))
+        
+       
+            
+
+
+
+
+
+
 
 
 class TestAllMethods(unittest.TestCase):
@@ -147,8 +204,8 @@ class TestAllMethods(unittest.TestCase):
     def test_compute_cost(self):
         #what's wrong with the following statements?
         #can you correct them?
-        self.assertEqual(self.s1.compute_cost(self.s1,5), 51)
-        self.assertEqual(self.s3.compute_cost(self.s3,6), 45)
+        self.assertEqual(self.s1.compute_cost(5), 50)
+        self.assertEqual(self.s3.compute_cost(6), 42)
 
 	# Check that the stall can properly see when it is empty
     def test_has_item(self):
@@ -178,7 +235,16 @@ class TestAllMethods(unittest.TestCase):
     
 ### Write main function
 def main():
+
     #Create different objects 
+    Lennox = Customer("Lennox", 100)
+    stall1 = Stall("stall1", {"Burger":40, "Taco":50}, 0, 10) #create inventory1 & fill in earnings & cost
+    stall2 = Stall("stall2", {"Burger": 40, "Taco": 10}, 0, 9)
+    Sully = Cashier("Sully", [stall1, stall2])
+  
+    Lennox.submit_order(Sully,stall1, 50)
+    
+
 
     #Try all cases in the validate_order function
     #Below you need to have *each customer instance* try the four cases
@@ -190,7 +256,7 @@ def main():
     
     #case 4: the customer successfully places an order
 
-    pass
+    #pass
 
 if __name__ == "__main__":
 	main()
